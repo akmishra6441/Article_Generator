@@ -1,23 +1,34 @@
 import streamlit as st
-from article_gen import generate_article
+from arti_gen import generate_blog
+from seo_tools import generate_seo
+from exporters import export_to_pdf, export_to_word, export_to_md
 
 st.set_page_config(page_title="AI Article Generator", layout="wide")
 
-st.title("📝 AI Article Generator")
-st.write("Generate high-quality articles using LangChain + OpenAI")
+st.title("📝 AI Article Generator (Phase 2)")
+st.write("Generate SEO-optimized blogs with multiple export options!")
 
-# Inputs
 topic = st.text_input("Enter Topic:")
 tone = st.selectbox("Select Tone:", ["informative", "casual", "professional", "storytelling"])
-words = st.slider("Word Count:", 100, 2000, 500)
+words = st.slider("Word Count:", 300, 2500, 800)
 keywords = st.text_input("Enter Keywords (comma separated):")
 
-# Button
-if st.button("Generate Article"):
-    with st.spinner("Generating..."):
-        article = generate_article(topic, tone, words, keywords)
-        st.subheader("Generated Article:")
-        st.write(article)
+if st.button("Generate Blog"):
+    with st.spinner("Generating blog..."):
+        blog = generate_blog(topic, tone, words, keywords)
+        st.subheader("Generated Blog:")
+        st.write(blog)
 
-        # Download button
-        st.download_button("📥 Download Article", article, file_name="article.txt")
+        # SEO section
+        st.subheader("🔍 SEO Suggestions")
+        seo = generate_seo(blog)
+        st.write(seo)
+
+        # Export buttons
+        st.subheader("📦 Export Options")
+        if st.download_button("Download PDF", open(export_to_pdf(blog), "rb"), file_name="article.pdf"):
+            pass
+        if st.download_button("Download Word", open(export_to_word(blog), "rb"), file_name="article.docx"):
+            pass
+        if st.download_button("Download Markdown", open(export_to_md(blog), "rb"), file_name="article.md"):
+            pass
