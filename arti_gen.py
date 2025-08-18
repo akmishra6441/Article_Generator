@@ -11,17 +11,20 @@ api_key = os.getenv("OPENAI_API_KEY")
 # Initialize OpenAI model
 llm = ChatOpenAI(openai_api_key=api_key, model="gpt-4o-mini", temperature=0.7)
 
-# Prompt template for article generation
+# Multi-section template
 template = """
-Write a detailed article on the topic: {topic}.
+Generate a detailed blog post with the following details:
+
+Topic: {topic}
 Tone: {tone}
 Word Count: Around {words} words
-Keywords to include: {keywords}
+Keywords: {keywords}
 
 Structure:
-1. Introduction
-2. Main Content
-3. Conclusion
+1. Blog Title
+2. Introduction
+3. 3-5 Subheadings with detailed explanations
+4. Conclusion
 """
 
 prompt = PromptTemplate(
@@ -29,8 +32,7 @@ prompt = PromptTemplate(
     template=template,
 )
 
-# LLM chain
 article_chain = LLMChain(llm=llm, prompt=prompt)
 
-def generate_article(topic, tone="informative", words=500, keywords=""):
+def generate_blog(topic, tone="informative", words=500, keywords=""):
     return article_chain.run(topic=topic, tone=tone, words=words, keywords=keywords)
