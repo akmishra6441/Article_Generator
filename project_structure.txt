@@ -1,0 +1,16 @@
+article-generator-website/
+├─ app.py                        # Streamlit UI
+├─ generator.py                  # Core generation logic (OpenAI/optional LangChain)
+├─ config.py                     # Settings (env, defaults, validation)
+├─ tests/
+│  └─ test_generator.py          # Unit tests for core logic
+├─ requirements.txt              # Dependencies
+├─ README.md                     # Documentation (below)
+├─ .env.example                  # Example env vars
+├─ .streamlit/
+│  └─ config.toml                # UI theming for screenshots
+├─ demo_screens/                 # Place your screenshots/gifs here
+│  ├─ home.png
+│  └─ generation.png
+├─ Dockerfile                    # Optional: containerize for deployment
+└─ Procfile                      # Optional: Heroku-style process spec
