@@ -1,34 +1,70 @@
+import os
 import streamlit as st
-from arti_gen import generate_blog
-from seo_tools import generate_seo
-from exporters import export_to_pdf, export_to_word, export_to_md
+from generator import generate_article, VALID_TONES
+from config import DEFAULT_TONE, DEFAULT_WORD_COUNT, MAX_WORD_COUNT
 
-st.set_page_config(page_title="AI Article Generator", layout="wide")
+st.set_page_config(page_title="Article Generator", page_icon="📝", layout="wide")
 
-st.title("📝 AI Article Generator (Phase 2)")
-st.write("Generate SEO-optimized blogs with multiple export options!")
+st.title("📝 Article Generator")
+st.caption("v1.0 – Polished & Tested")
 
-topic = st.text_input("Enter Topic:")
-tone = st.selectbox("Select Tone:", ["informative", "casual", "professional", "storytelling"])
-words = st.slider("Word Count:", 300, 2500, 800)
-keywords = st.text_input("Enter Keywords (comma separated):")
+with st.sidebar:
+    st.header("Settings")
+    tone = st.selectbox("Tone", VALID_TONES, index=VALID_TONES.index(DEFAULT_TONE))
+    word_count = st.number_input(
+        "Target word count",
+        min_value=50,
+        max_value=MAX_WORD_COUNT,
+        value=DEFAULT_WORD_COUNT,
+        step=50,
+        help="Approximate length. The model may vary slightly."
+    )
+    temperature = st.slider(
+        "Creativity (temperature)", 0.0, 1.5, 0.7, 0.1,
+        help="Higher = more creative, lower = more factual"
+    )
 
-if st.button("Generate Blog"):
-    with st.spinner("Generating blog..."):
-        blog = generate_blog(topic, tone, words, keywords)
-        st.subheader("Generated Blog:")
-        st.write(blog)
+st.subheader("Enter your topic")
+topic = st.text_input("Topic", placeholder="e.g., The impact of AI on remote work")
 
-        # SEO section
-        st.subheader("🔍 SEO Suggestions")
-        seo = generate_seo(blog)
-        st.write(seo)
+col1, col2 = st.columns([1, 1])
+with col1:
+    keywords = st.text_input("Optional keywords (comma-separated)", placeholder="productivity, collaboration, ethics")
+with col2:
+    outline = st.checkbox("Generate with outline first", value=True)
 
-        # Export buttons
-        st.subheader("📦 Export Options")
-        if st.download_button("Download PDF", open(export_to_pdf(blog), "rb"), file_name="article.pdf"):
-            pass
-        if st.download_button("Download Word", open(export_to_word(blog), "rb"), file_name="article.docx"):
-            pass
-        if st.download_button("Download Markdown", open(export_to_md(blog), "rb"), file_name="article.md"):
-            pass
+generate_btn = st.button("Generate Article", type="primary")
+
+# Status / errors area
+status_placeholder = st.empty()
+output_placeholder = st.empty()
+
+if generate_btn:
+    try:
+        with st.spinner("Generating... this may take a moment"):
+            article, meta = generate_article(
+                topic=topic,
+                tone=tone,
+                word_count=int(word_count),
+                keywords=keywords,
+                temperature=float(temperature),
+                outline_first=outline,
+            )
+        status_placeholder.success(
+            f"✅ Done • Tone: {meta['tone']} • Target words: {meta['word_count']} • Model: {meta['model']}"
+        )
+        st.download_button(
+            label="Download as .txt",
+            data=article,
+            file_name=f"article_{meta['slug']}.txt",
+            mime="text/plain"
+        )
+        output_placeholder.markdown(article)
+    except ValueError as ve:
+        status_placeholder.error(f"Input error: {ve}")
+    except Exception as e:
+        status_placeholder.error("Unexpected error. Check logs / API key.")
+        st.exception(e)
+
+st.markdown("---")
+st.caption("Tip: Add your screenshots in `demo_screens/` for the README.")
