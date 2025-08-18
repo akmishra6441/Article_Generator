@@ -3,3 +3,8 @@ langchain-openai
 openai
 streamlit
 python-dotenv
+
+streamlit>=1.36
+openai>=1.40
+pytest>=8.0
+python-dotenv>=1.0
